@@ -151,17 +151,28 @@ class Client
             
             $query .= "Content-Length: ".strlen($request)."\n\n".$request."\n";
 
-        	if (!@fputs($socket, $query, strlen($query)))
-		    {
-			    if($retries == 4) throw new XMLRPCException("Error sending data to server.");
-			    else
-			    {
-				    @fclose($socket);
-				    $retries++;
-				    usleep(50);
-				    continue;
-			    }
-		    }
+        	$bytesWritten = 0;
+			$continueLoop = false;
+			$querySize = strlen($query);
+			while($bytesWritten < $querySize)
+			{
+				$result = @fputs($socket, $query, 1024);
+				if (!$result)
+				{
+					if($retries == 4) throw new XMLRPCException("Error sending data to server.");
+					else
+					{
+						@fclose($socket);
+						$retries++;
+						usleep(50);
+						$continueLoop = true;
+						break;
+					}
+				}
+				$bytesWritten += $result;
+				$query = substr($query, $result);
+			}
+			if($continueLoop) continue;
 
         	while (!feof($socket) && (time() - $startTime) < 30)
         	{
