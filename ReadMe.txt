@@ -21,7 +21,7 @@ SSL options:
 		
 	To set your Homegear username and password:
 		$Client->setUsername(USERNAME);
-		$Client->setUsername(PASSWORD);
+		$Client->setPassword(PASSWORD);
 	
 And then invoke XML RPC methods with:
 
