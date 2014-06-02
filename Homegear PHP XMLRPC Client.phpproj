@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Name>Homegear_PHP_XMLRPC_Client</Name>
+    <ProjectGuid>cf003ef9-26fc-40db-b430-e6107bf8e0e2</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Homegear_PHP_XMLRPC_Client</RootNamespace>
+    <!-- important to be opened by PHP Tools, when also Phalanger Tools are installed -->
+    <ProjectTypeGuids>{A0786B88-2ADB-4C21-ABE8-AA2D79766269}</ProjectTypeGuids>
+    <AssemblyName>Homegear PHP XMLRPC Client</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <IncludeDebugInformation>true</IncludeDebugInformation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <IncludeDebugInformation>false</IncludeDebugInformation>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="HM-XMLRPC-Client\Client.php" />
+    <Compile Include="Test.php" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="HM-XMLRPC-Client\" />
+  </ItemGroup>
+</Project>
