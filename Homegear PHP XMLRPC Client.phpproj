@@ -17,6 +17,7 @@
     <IncludeDebugInformation>false</IncludeDebugInformation>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Connect.php" />
     <Compile Include="HM-XMLRPC-Client\Client.php" />
     <Compile Include="Test.php" />
   </ItemGroup>

@@ -1,23 +1,6 @@
 #!/usr/bin/env php
 <?php
-$clientPath = (PHP_OS == "WINNT") ? "HM-XMLRPC-Client\\" : "HM-XMLRPC-Client/";
-require_once($clientPath."Client.php");
-
-$host = "homegear";
-$port = 2003;
-$ssl = true;
-$username = "homegear";
-$password = "homegear";
-
-$Client = new \XMLRPC\Client($host, $port, true);
-$Client->setSSLVerifyPeer(false);
-
-//!!! You should create a signed certificate and then enable "verify peer" !!!
-//$Client->setSSLVerifyPeer(true);
-//$Client->setCAFile("/path/to/ca.crt");
-
-$Client->setUsername($username);
-$Client->setPassword($password);
+include_once("Connect.php");
 
 print_r($Client->send("listDevices", array()));
 //print_r($Client->send("system.methodHelp", array("getLinks")));
