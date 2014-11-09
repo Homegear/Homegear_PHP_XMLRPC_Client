@@ -1,8 +1,8 @@
 #!/usr/bin/env php
 <?php
-$buildInScriptEngine = false;
+$builtInScriptEngine = false;
 
-if($buildInScriptEngine)
+if($builtInScriptEngine)
 {
     //hg_set_value(213, 1, "STATE", true);
     //hg_get_value(213, 1, "STATE");
