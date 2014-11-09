@@ -98,6 +98,10 @@ class Client
     }
     
     /**
+     * Holds the socket connection
+     * @var socket
+     */
+    private $socket = null;
     
     /**
      * Default constructor
@@ -110,6 +114,40 @@ class Client
         $this->host = $host;
         $this->port = $port;
         $this->ssl = $ssl;
+        
+        $this->connect();
+    }
+    
+    public function __destruct()
+    {
+        if($this->socket) @fclose($this->socket);
+        $this->socket = null;
+    }
+    
+    /**
+     * Connects to Homegear
+     */
+    private function connect()
+    {
+        if(!$this->socket)
+        {
+            $this->socket = @stream_socket_client("tcp://".$this->host.":".$this->port, $errorNumber, $errorString, 10);
+            if(!$this->socket) throw new XMLRPCException("Could not open socket. Host: ".$this->host." Port: ".$this->port." Error: $errorString ($errorNumber)");
+            if($this->ssl)
+            {
+                stream_set_blocking($this->socket, true);
+                stream_context_set_option($this->socket, 'ssl', 'SNI_enabled', true);
+                if($this->caFile) stream_context_set_option($this->socket, 'ssl', 'cafile', $this->caFile);
+                stream_context_set_option($this->socket, 'ssl', 'verify_peer', $this->sslVerifyPeer);
+                $secure = stream_socket_enable_crypto($this->socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+                if(!$secure) 
+                {
+                    @fclose($this->socket);
+                    throw new XMLRPCException("XMLRPC error: Failed to enable SSL.");
+                }
+                stream_set_blocking($this->socket, false);
+            }
+        }
     }
     
     /**
@@ -122,27 +160,12 @@ class Client
         $response = '';
 	    $retries = 0;
 	    $startTime = time();
-	    while(!$response && $retries < 5)
+	    while(!$response && $retries < 20)
 	    {
-	        $socket = @stream_socket_client("tcp://".$this->host.":".$this->port, $errorNumber, $errorString, 10);
-        	if(!$socket) throw new XMLRPCException("Could not open socket. Host: ".$this->host." Port: ".$this->port." Error: $errorString ($errorNumber)");
-            if($this->ssl)
-            {
-                stream_set_blocking($socket, true);
-                stream_context_set_option($socket, 'ssl', 'SNI_enabled', true);
-                if($this->caFile) stream_context_set_option($socket, 'ssl', 'cafile', $this->caFile);
-                stream_context_set_option($socket, 'ssl', 'verify_peer', $this->sslVerifyPeer);
-                $secure = stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
-                if(!$secure) 
-                {
-                    @fclose($socket);
-                    throw new XMLRPCException("XMLRPC error: Failed to enable SSL.");
-                }
-                stream_set_blocking($socket, false);
-            }
+	        if(!$this->socket) $this->connect();
 
 		    $response = '';
-        	$query = "POST / HTTP/1.0\nUser_Agent: HM-XMLRPC-Client\nHost: ".$this->host."\nContent-Type: text/xml\n";
+        	$query = "POST / HTTP/1.1\nUser_Agent: HM-XMLRPC-Client\nHost: ".$this->host."\nContent-Type: text/xml\n";
             
             if($this->username)
             {
@@ -156,13 +179,14 @@ class Client
 			$querySize = strlen($query);
 			while($bytesWritten < $querySize)
 			{
-				$result = @fputs($socket, $query, 1024);
+				$result = @fputs($this->socket, $query, 1024);
 				if (!$result)
 				{
-					if($retries == 4) throw new XMLRPCException("Error sending data to server.");
+					if($retries == 19) throw new XMLRPCException("Error sending data to server.");
 					else
 					{
-						@fclose($socket);
+						@fclose($this->socket);
+                        $this->socket = null;
 						$retries++;
 						usleep(50);
 						$continueLoop = true;
@@ -174,11 +198,16 @@ class Client
 			}
 			if($continueLoop) continue;
 
-        	while (!feof($socket) && (time() - $startTime) < 30)
+        	while (!feof($this->socket) && (time() - $startTime) < 30)
         	{
-            		$response .= @fgets($socket);
+                $response .= @fgets($this->socket);
         	}
-        	@fclose($socket);
+            
+            if(!$response)
+            {
+                @fclose($this->socket);
+                $this->socket = null;
+            }
 		    $retries++;
 	    }
         if(strncmp($response, "HTTP/1.1 200 OK", 15) === 0) return substr($response, strpos($response, "<"));
