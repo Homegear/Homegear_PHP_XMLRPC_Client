@@ -12,7 +12,7 @@ class XMLRPCException extends \Exception
 /**
  * Client The XML RPC client class
  *
- * 
+ *
  *
  * @version 1.0
  * @author sathya
@@ -158,14 +158,14 @@ class Client
     private function sendRequest($request)
     {
         $response = '';
-	    $retries = 0;
-	    $startTime = time();
-	    while(!$response && $retries < 20)
-	    {
-	        if(!$this->socket) $this->connect();
+        $retries = 0;
+        $startTime = time();
+        while(!$response && $retries < 20)
+        {
+            if(!$this->socket) $this->connect();
 
-		    $response = '';
-        	$query = "POST / HTTP/1.1\nUser_Agent: HM-XMLRPC-Client\nHost: ".$this->host."\nContent-Type: text/xml\n";
+            $response = '';
+            $query = "POST / HTTP/1.1\nUser_Agent: HM-XMLRPC-Client\nHost: ".$this->host."\nConnection: Keep-Alive\nContent-Type: text/xml\n";
             
             if($this->username)
             {
@@ -174,42 +174,44 @@ class Client
             
             $query .= "Content-Length: ".strlen($request)."\n\n".$request."\n";
 
-        	$bytesWritten = 0;
-			$continueLoop = false;
-			$querySize = strlen($query);
-			while($bytesWritten < $querySize)
-			{
-				$result = @fputs($this->socket, $query, 1024);
-				if (!$result)
-				{
-					if($retries == 19) throw new XMLRPCException("Error sending data to server.");
-					else
-					{
-						@fclose($this->socket);
+            $bytesWritten = 0;
+            $continueLoop = false;
+            $querySize = strlen($query);
+            while($bytesWritten < $querySize)
+            {
+                $result = @fputs($this->socket, $query, 1024);
+                if (!$result)
+                {
+                    if($retries == 19) throw new XMLRPCException("Error sending data to server.");
+                    else
+                    {
+                        @fclose($this->socket);
                         $this->socket = null;
-						$retries++;
-						usleep(50);
-						$continueLoop = true;
-						break;
-					}
-				}
-				$bytesWritten += $result;
-				$query = substr($query, $result);
-			}
-			if($continueLoop) continue;
+                        $retries++;
+                        usleep(50);
+                        $continueLoop = true;
+                        break;
+                    }
+                }
+                $bytesWritten += $result;
+                $query = substr($query, $result);
+            }
+            if($continueLoop) continue;
 
-        	while (!feof($this->socket) && (time() - $startTime) < 30)
-        	{
+            while (!feof($this->socket) && (time() - $startTime) < 30)
+            {
                 $response .= @fgets($this->socket);
-        	}
+                //A little dirty, but it works. As the end always looks like this, I don't see a problem.
+                if(substr($response, -3) == ">\r\n") break;
+            }
             
             if(!$response)
             {
                 @fclose($this->socket);
                 $this->socket = null;
             }
-		    $retries++;
-	    }
+            $retries++;
+        }
         if(strncmp($response, "HTTP/1.1 200 OK", 15) === 0) return substr($response, strpos($response, "<"));
         if($response) throw new XMLRPCException("XMLRPC error:\r\n".$response); else throw new XMLRPCException("XMLRPC error: Response was empty.");
     }
