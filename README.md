@@ -4,9 +4,9 @@ Also see: https://www.homegear.eu/index.php/Homegear_Reference
 
 = Built-in script engine =
 
-Visit https://www.homegear.eu/index.php/Homegear_Reference#Homegear_0.6 for more information.
+See Example.php.
 
-See Test.php for an example.
+Visit https://www.homegear.eu/index.php/Homegear_Reference#Homegear_0.6 for more information.
 
 = RPC calls over TCP socket connection =
 
@@ -37,4 +37,4 @@ And then invoke XML RPC methods with:
 
 	$Client->send("METHODNAME", array(PARAMETERS));
 	
-See Test.php for an example.
+See Example.php for an example.
