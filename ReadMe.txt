@@ -4,13 +4,7 @@ Also see: https://www.homegear.eu/index.php/Homegear_Reference
 
 = Built-in script engine =
 
-Execute "hg_invoke" to call Homegear's RPC methods:
-
-	hg_invoke("setInterface", 142, "My-CRC");
-	
-The following shortcut functions are available: hg_set_system, hg_get_system, hg_set_meta, hg_get_meta, hg_set_value, hg_get_value.
-
-To execute you can either use the RPC method "runScript" or "homegear -e runScript YourScript.php".
+Visit https://www.homegear.eu/index.php/Homegear_Reference#Homegear_0.6 for more information.
 
 See Test.php for an example.
 

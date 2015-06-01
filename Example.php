@@ -1,11 +1,25 @@
 #!/usr/bin/env php
 <?php
-if(function_exists("hg_invoke"))
+if(class_exists("Homegear\Homegear"))
 {
-	/**** Use built-in script engine ****/
+	/**** Use built-in script engine of Homegear 0.6 ****/
+	try
+	{
+		$hg = new \Homegear\Homegear();
+		print_r($hg->listDevices());
+		//$hg->setValue(19, 1, "VALVE_STATE", 0);
+		//print $hg->getValue(19, 1, "VALVE_STATE");
+	}
+	catch(\Homegear\HomegearException $e) {
+		print "Exception catched. Code: ".$e->getCode().". Message: ".$e->getMessage();
+	}
+}
+else if(function_exists("hg_invoke"))
+{
+	/**** Use built-in script engine of Homegear 0.5 ****/
 	print_r(hg_invoke("listDevices"));
-	//print_r(hg_set_value(19, 1, "VALVE_STATE", 0));
-	//print_r(hg_get_value(19, 1, "VALVE_STATE"));
+	//hg_set_value(19, 1, "VALVE_STATE", 0);
+	//print hg_get_value(19, 1, "VALVE_STATE");
 }
 else
 {
