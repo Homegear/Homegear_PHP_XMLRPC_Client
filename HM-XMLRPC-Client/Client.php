@@ -226,8 +226,10 @@ class Client
     {
         $request = xmlrpc_encode_request($methodName, $params);
         $response = $this->sendRequest($request);
-        $response = xmlrpc_decode(trim($response)); //Without the trim function returns null
-        return $response;
+
+    	$response = str_replace('i8>', 'i4>', $response);
+
+        return xmlrpc_decode(trim($response)); //Without the trim function returns null
     }
 }
 
